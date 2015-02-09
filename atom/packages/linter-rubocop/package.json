@@ -22,8 +22,8 @@
   "homepage": "https://github.com/AtomLinter/linter-rubocop",
   "_id": "linter-rubocop@0.2.1",
   "_shasum": "4dbc4a35b1cceab266e1a2118bd1872f88d7a740",
-  "_resolved": "file:../d-11519-10553-9yffkk/package.tgz",
-  "_from": "../d-11519-10553-9yffkk/package.tgz",
+  "_resolved": "file:../d-11519-13533-zh6qi9/package.tgz",
+  "_from": "../d-11519-13533-zh6qi9/package.tgz",
   "_atomModuleCache": {
     "version": 1,
     "dependencies": [],

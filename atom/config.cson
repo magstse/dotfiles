@@ -8,3 +8,8 @@
       "atom-dark-ui"
       "solarized-dark-syntax"
     ]
+  "exception-reporting":
+    userId: "5e43159c-0af7-4614-979c-e04f25a71578"
+  welcome:
+    showOnStartup: false
+  linter: {}
