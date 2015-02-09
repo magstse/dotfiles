@@ -1,0 +1,10 @@
+"*":
+  editor:
+    invisibles: {}
+    preferredLineLength: 100
+    fontSize: 13
+  core:
+    themes: [
+      "atom-dark-ui"
+      "solarized-dark-syntax"
+    ]
