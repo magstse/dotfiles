@@ -3,6 +3,8 @@
     invisibles: {}
     preferredLineLength: 100
     fontSize: 13
+    showInvisibles: true
+    showIndentGuide: true
   core:
     themes: [
       "atom-dark-ui"
@@ -13,3 +15,5 @@
   welcome:
     showOnStartup: false
   linter: {}
+  "atom-beautify":
+    _analyticsUserId: "65f4271a-cd10-4224-b2bd-ee72bc113080"
