@@ -20,3 +20,5 @@
   "vim-mode":
     startInInsertMode: true
   minimap: {}
+  "git-log":
+    fontScale: 0.8
