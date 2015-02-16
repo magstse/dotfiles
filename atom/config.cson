@@ -22,3 +22,13 @@
   minimap: {}
   "git-log":
     fontScale: 0.8
+  "spell-check":
+    grammars: [
+      "source.asciidoc"
+      "source.gfm"
+      "source.ruby"
+      "source.ruby.rails"
+      "text.git-commit"
+      "text.html.erb"
+      "text.plain"
+    ]
