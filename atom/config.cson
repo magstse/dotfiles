@@ -3,8 +3,8 @@
     invisibles: {}
     preferredLineLength: 100
     fontSize: 13
-    showInvisibles: true
     showIndentGuide: true
+    showInvisibles: true
   core:
     themes: [
       "atom-dark-ui"
@@ -22,3 +22,13 @@
   minimap: {}
   "git-log":
     fontScale: 0.8
+  "spell-check":
+    grammars: [
+      "source.asciidoc"
+      "source.gfm"
+      "source.ruby"
+      "text.git-commit"
+      "text.html.erb"
+      "text.plain"
+    ]
+  "autocomplete-plus": {}
