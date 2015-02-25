@@ -27,6 +27,7 @@
       "source.asciidoc"
       "source.gfm"
       "source.ruby"
+      "source.ruby.rails"
       "text.git-commit"
       "text.html.erb"
       "text.plain"
