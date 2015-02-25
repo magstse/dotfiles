@@ -1,14 +1,16 @@
 {debounce} = require 'underscore-plus'
 {CompositeDisposable, Disposable} = require 'event-kit'
+{EventsDelegation} = require 'atom-utils'
 DOMStylesReader = require './mixins/dom-styles-reader'
 CanvasDrawer = require './mixins/canvas-drawer'
 
-MinimapQuickSettingsView = null
+MinimapQuickSettingsElement = null
 
 # Public:
 class MinimapElement extends HTMLElement
   DOMStylesReader.includeInto(this)
   CanvasDrawer.includeInto(this)
+  EventsDelegation.includeInto(this)
 
   ### Public ###
 
@@ -163,31 +165,39 @@ class MinimapElement extends HTMLElement
     @scrollIndicator = undefined
 
   initializeOpenQuickSettings: ->
+    return if @openQuickSettings?
+
     @openQuickSettings = document.createElement('div')
     @openQuickSettings.classList.add 'open-minimap-quick-settings'
     @controls.appendChild(@openQuickSettings)
-    @openQuickSettings.addEventListener 'mousedown', (e) =>
-      e.preventDefault()
-      e.stopPropagation()
+    @openQuickSettingSubscription = @subscribeTo @openQuickSettings,
+      'mousedown': (e) =>
+        e.preventDefault()
+        e.stopPropagation()
 
-      if @quickSettingsView?
-        @quickSettingsView.destroy()
-        @quickSettingsSubscription.dispose()
-      else
-        MinimapQuickSettingsView ?= require './minimap-quick-settings-view'
-        @quickSettingsView = new MinimapQuickSettingsView(this)
-        @quickSettingsSubscription = @quickSettingsView.onDidDestroy =>
-          @quickSettingsView = null
+        if @quickSettingsElement?
+          @quickSettingsElement.destroy()
+          @quickSettingsSubscription.dispose()
+        else
+          MinimapQuickSettingsElement ?= require './minimap-quick-settings-element'
+          @quickSettingsElement = new MinimapQuickSettingsElement
+          @quickSettingsElement.setModel(this)
+          @quickSettingsSubscription = @quickSettingsElement.onDidDestroy =>
+            @quickSettingsElement = null
 
-        @quickSettingsView.attach()
-        {top, left} = @getBoundingClientRect()
-        @quickSettingsView.css({
-          top: top + 'px'
-          left: (left - @quickSettingsView.width()) + 'px'
-        })
+          @quickSettingsElement.attach()
+          {top, left, right} = @canvas.getBoundingClientRect()
+          @quickSettingsElement.style.top = top + 'px'
+
+          if @displayMinimapOnLeft
+            @quickSettingsElement.style.left = (right) + 'px'
+          else
+            @quickSettingsElement.style.left = (left - @quickSettingsElement.clientWidth) + 'px'
 
   disposeOpenQuickSettings: ->
+    return unless @openQuickSettings?
     @controls.removeChild(@openQuickSettings)
+    @openQuickSettingSubscription.dispose()
     @openQuickSettings = undefined
 
   getTextEditor: -> @minimap.getTextEditor()
@@ -266,12 +276,12 @@ class MinimapElement extends HTMLElement
       transform: @makeTranslate(visibleAreaLeft, visibleAreaTop)
 
     @applyStyles @controls,
-      width: Math.min(@canvas.width, @width) + 'px'
+      width: Math.min(@canvas.width / devicePixelRatio, @width) + 'px'
 
     canvasTop = @minimap.getFirstVisibleScreenRow() * @minimap.getLineHeight() - @minimap.getScrollTop()
 
     canvasTransform = @makeTranslate(0, canvasTop)
-    canvasTransform += " " + @makeScale(1/devicePixelRatio) if devicePixelRatio isnt 1
+    canvasTransform += " " + @makeScale(1 / devicePixelRatio) if devicePixelRatio isnt 1
     @applyStyles @canvas, transform: canvasTransform
 
     if @minimapScrollIndicator and @minimap.canScroll() and not @scrollIndicator

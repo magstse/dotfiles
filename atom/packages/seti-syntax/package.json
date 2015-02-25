@@ -1,7 +1,7 @@
 {
   "name": "seti-syntax",
   "theme": "syntax",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "description": "Seti Syntax - A subtle dark colored theme for Atom.",
   "repository": {
     "type": "git",
@@ -11,16 +11,16 @@
   "engines": {
     "atom": ">0.170.0"
   },
-  "readme": "# Seti Syntax\n\nA subtle dark colored syntax theme for Atom. [Seti UI](https://atom.io/themes/seti-ui) also available.\n\n![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/screenshot.png)\n\n\n### Custom Icons\n[ ![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/_icons/circular/circular-128x128.png) ](_icons/circular/)\n[ ![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/_icons/rounded/rounded-128x128.png) ](_icons/rounded/)\n[ ![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/_icons/squared/squared-128x128.png) ](_icons/squared/)\n",
+  "readme": "# Seti Syntax\n\n[![Join the chat at https://gitter.im/jesseweed/seti-syntax](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jesseweed/seti-syntax?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)\n\nA subtle dark colored syntax theme for Atom. [Seti UI](https://atom.io/themes/seti-ui) also available.\n\n![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/screenshot.png)\n\n\n### Custom Icons\n[ ![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/_icons/circular/circular-128x128.png) ](_icons/circular/)\n[ ![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/_icons/rounded/rounded-128x128.png) ](_icons/rounded/)\n[ ![Screenshot](https://github.com/jesseweed/seti-syntax/raw/master/_icons/squared/squared-128x128.png) ](_icons/squared/)\n",
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/jesseweed/seti-syntax/issues"
   },
   "homepage": "https://github.com/jesseweed/seti-syntax",
-  "_id": "seti-syntax@0.3.1",
-  "_shasum": "37a2297cad6cf1fa9c07c9e349b61ddeed5a4aee",
-  "_resolved": "file:../d-11519-12130-1sho3qf/package.tgz",
-  "_from": "../d-11519-12130-1sho3qf/package.tgz",
+  "_id": "seti-syntax@0.3.3",
+  "_shasum": "b7abbabb0dfe8d303f22402b0f26582a252ddf98",
+  "_resolved": "file:../d-115125-32446-n4vq6g/package.tgz",
+  "_from": "../d-115125-32446-n4vq6g/package.tgz",
   "_atomModuleCache": {
     "version": 1,
     "dependencies": [],

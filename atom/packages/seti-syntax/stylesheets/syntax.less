@@ -185,9 +185,12 @@
     // QUOTES
     &.string,
     &.variable,
-    &.parameters,
     &.array {
       color: @string;
+    }
+
+    &.parameters {
+      color: @code-font-color;
     }
 
     &.heading,
@@ -197,7 +200,7 @@
 
     &.bold {
       color: @code-font-color;
-      font-style: bold;
+      font-weight: bold;
     }
 
     &.italic {
@@ -395,7 +398,7 @@
 .markup {
   &.bold {
     color: @markup;
-    font-style: bold;
+    font-weight: bold;
   }
 
   &.changed {
@@ -439,7 +442,8 @@
   }
 }
 
-.editor.mini, :host(.mini) {
+
+atom-text-editor[mini], :host(.mini) {
  .scroll-view {
     padding-left: 1px;
   }
