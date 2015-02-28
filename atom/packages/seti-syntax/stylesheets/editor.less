@@ -1,13 +1,13 @@
 @import "colors.less";
 
 // EDITOR BACKGROUND & FONT COLORS
-.editor-colors, :host {
+.atom-text-editor, :host {
   background-color: @code-background;
   color: @code-font-color;
 }
 
 // MAIN CODE EDITOR STYLES
-.editor, :host {
+.atom-text-editor, :host {
 
   background-color: @code-background;
   color: @code-font-color;
@@ -40,8 +40,7 @@
       // GUTTER BACKGROUND
       background: @gutter-background;
       color: @gutter-text;
-      padding: 0px;
-
+      padding-left: 10px;
 
       // SELECTED BLOCK
       &.cursor-line {

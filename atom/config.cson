@@ -3,8 +3,8 @@
     invisibles: {}
     preferredLineLength: 100
     fontSize: 13
-    showInvisibles: true
     showIndentGuide: true
+    showInvisibles: true
   core:
     themes: [
       "atom-dark-ui"
@@ -33,3 +33,4 @@
       "text.html.erb"
       "text.plain"
     ]
+  "autocomplete-plus": {}

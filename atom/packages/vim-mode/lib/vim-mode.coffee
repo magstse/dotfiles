@@ -2,23 +2,17 @@
 StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
+settings = require './settings'
 
 module.exports =
-  config:
-    startInInsertMode:
-      type: 'boolean'
-      default: false
-    useSmartcaseForSearch:
-      type: 'boolean'
-      default: false
+  config: settings.config
 
   activate: (state) ->
     @disposables = new CompositeDisposable
     globalVimState = new GlobalVimState
-    statusBarManager = new StatusBarManager
+    @statusBarManager = new StatusBarManager
     vimStates = new WeakMap
 
-    @disposables.add statusBarManager.initialize()
     @disposables.add atom.workspace.observeTextEditors (editor) =>
       return if editor.mini
 
@@ -27,7 +21,7 @@ module.exports =
       if not vimStates.get(editor)
         vimState = new VimState(
           element,
-          statusBarManager,
+          @statusBarManager,
           globalVimState
         )
 
@@ -38,3 +32,9 @@ module.exports =
 
   deactivate: ->
     @disposables.dispose()
+
+  consumeStatusBar: (statusBar) ->
+    @statusBarManager.initialize(statusBar)
+    @statusBarManager.attach()
+    @disposables.add new Disposable =>
+      @statusBarManager.detach()
