@@ -26,8 +26,10 @@
     grammars: [
       "source.asciidoc"
       "source.gfm"
+      "source.js"
       "source.ruby"
       "source.ruby.rails"
+      "source.yaml"
       "text.git-commit"
       "text.html.erb"
       "text.plain"
