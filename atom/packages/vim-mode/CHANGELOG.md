@@ -1,5 +1,58 @@
 ## HEAD
 
+## 0.44
+
+* Fixed issue where canceling the replace operator would delete text - @jacekkopecky
+* Implemented repeat search commands: '//', '??', etc - @jacekkopecky
+* Fixed issue where registers' contents were overwritten with the empty string - @jacekkopecky
+
+## 0.43
+
+* Made '%', '\*' and '\#' interact properly with search history @jacekkopecky
+
+## 0.42
+
+* Fixed spurious command bindings on command mode input element - @andischerer
+
+## 0.41
+
+* Added ability to append to register - @jacekkopecky
+* Fixed an issue where deactivation would sometimes fail
+
+## 0.40
+
+* Fixed an issue where the search input text was not visible - @tmm1
+* Added a different status-bar entry for visual-line mode - @jacekkopecky
+
+## 0.39
+
+* Made repeating insertions work more correctly with multiple cursors
+* Fixed bugs in `*` and `#` with cursor between words - @jacekkopecky
+
+## 0.38
+
+* Implemented change case operators: `gU`, `gu` and `g~` - @jacekkopecky
+* Fixed behavior of repeating `I` and `A` insertions - @jacekkopecky
+
+## 0.36
+
+* Fixed an issue where `d` and `c` with forward motions would sometimes
+  incorrectly delete the character before the cursor - @deiwin
+
+## 0.35
+
+* Implemented basic version of `i t` operator - @neiled
+* Made `t` motion repeatable with `;` - @jacekkopecky
+
+## 0.34
+
+* Added a service API so that other packages can extend vim-mode - @lloeki
+* Added an insert-mode mapping for ctrl-u - @nicolaiskogheim
+
+## 0.33
+
+* Added a setting for using the system clipboard as the default register - @chrisfarms
+
 ## 0.32
 
 * Added setting for allowing traversal of line breaks via `h` and `l` - @jacekkopecky

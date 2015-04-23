@@ -70,7 +70,7 @@ describe 'MinimapElement', ->
   #    ##     ##    ##       ##    ##     ##  ######  ##     ##
 
   describe 'when attached to the text editor element', ->
-    [noAnimationFrame, nextAnimationFrame, canvas, visibleArea] = []
+    [noAnimationFrame, nextAnimationFrame, lastFn, canvas, visibleArea] = []
 
     beforeEach ->
       # Comment after body below to leave the created text editor and minimap
@@ -82,6 +82,7 @@ describe 'MinimapElement', ->
 
       requestAnimationFrameSafe = window.requestAnimationFrame
       spyOn(window, 'requestAnimationFrame').andCallFake (fn) ->
+        lastFn = fn
         nextAnimationFrame = ->
           nextAnimationFrame = noAnimationFrame
           fn()
@@ -119,6 +120,8 @@ describe 'MinimapElement', ->
       editor.setScrollTop(1000)
       editor.setScrollLeft(200)
       minimapElement.attach()
+
+    afterEach -> minimap.destroy()
 
     it 'takes the height of the editor', ->
       expect(minimapElement.offsetHeight).toEqual(editorElement.clientHeight)
@@ -161,6 +164,12 @@ describe 'MinimapElement', ->
 
         expect(realOffsetTop(canvas)).toBeCloseTo(-2, -1)
 
+      it 'does not fail to update render the invisible char when modified', ->
+        atom.config.set 'editor.showInvisibles', true
+        atom.config.set 'editor.invisibles', cr: '*'
+
+        expect(-> nextAnimationFrame()).not.toThrow()
+
       it 'renders the visible line decorations', ->
         spyOn(minimapElement, 'drawLineDecorations').andCallThrough()
 
@@ -187,6 +196,19 @@ describe 'MinimapElement', ->
         expect(minimapElement.drawHighlightDecoration).toHaveBeenCalled()
         expect(minimapElement.drawHighlightDecoration.calls.length).toEqual(2)
 
+      it 'renders the visible outline decorations', ->
+        spyOn(minimapElement, 'drawHighlightOutlineDecoration').andCallThrough()
+
+        minimap.decorateMarker(editor.markBufferRange([[1,4], [3,6]]), type: 'highlight-outline', color: '#0000ff')
+        minimap.decorateMarker(editor.markBufferRange([[6,0], [6,7]]), type: 'highlight-outline', color: '#0000ff')
+        minimap.decorateMarker(editor.markBufferRange([[100,3], [100,5]]), type: 'highlight-outline', color: '#0000ff')
+
+        editor.setScrollTop(0)
+        nextAnimationFrame()
+
+        expect(minimapElement.drawHighlightOutlineDecoration).toHaveBeenCalled()
+        expect(minimapElement.drawHighlightOutlineDecoration.calls.length).toEqual(4)
+
       describe 'when the editor is scrolled', ->
         beforeEach ->
           editor.setScrollTop(2000)
@@ -204,8 +226,8 @@ describe 'MinimapElement', ->
           editorElement.style.width = '800px'
           editorElement.style.height = '500px'
 
-          sleep(150)
-          runs -> nextAnimationFrame()
+          minimapElement.measureHeightAndWidth()
+          nextAnimationFrame()
 
         it 'detect the resize and adjust itself', ->
           expect(minimapElement.offsetWidth).toBeCloseTo(editorElement.offsetWidth / 11, 0)
@@ -228,20 +250,31 @@ describe 'MinimapElement', ->
           nextAnimationFrame()
 
           expect(minimapElement.drawLines).toHaveBeenCalled()
-          expect(minimapElement.drawLines.calls[1].args[1]).toEqual(100)
-          expect(minimapElement.drawLines.calls[1].args[2]).toEqual(101)
+          expect(minimapElement.drawLines.argsForCall[1][1]).toEqual(100)
+          expect(minimapElement.drawLines.argsForCall[1][2]).toEqual(101)
 
       describe 'when the editor visibility change', ->
         it 'does not modify the size of the canvas', ->
           canvasWidth = minimapElement.canvas.width
           canvasHeight = minimapElement.canvas.height
           editorElement.style.display = 'none'
-          sleep(150)
-          runs ->
-            nextAnimationFrame()
 
-            expect(minimapElement.canvas.width).toEqual(canvasWidth)
-            expect(minimapElement.canvas.height).toEqual(canvasHeight)
+          minimapElement.measureHeightAndWidth()
+          nextAnimationFrame()
+
+          expect(minimapElement.canvas.width).toEqual(canvasWidth)
+          expect(minimapElement.canvas.height).toEqual(canvasHeight)
+
+        describe 'from hidden to visible', ->
+          beforeEach ->
+            editorElement.style.display = 'none'
+            minimapElement.checkForVisibilityChange()
+            spyOn(minimapElement, 'requestForcedUpdate')
+            editorElement.style.display = ''
+            minimapElement.pollDOM()
+
+          it 'requests an update of the whole minimap', ->
+            expect(minimapElement.requestForcedUpdate).toHaveBeenCalled()
 
     #     ######   ######  ########   #######  ##       ##
     #    ##    ## ##    ## ##     ## ##     ## ##       ##
@@ -260,8 +293,8 @@ describe 'MinimapElement', ->
         editor.setScrollTop(0)
         editor.setScrollLeft(0)
 
-        sleep(150)
-        runs -> nextAnimationFrame()
+        minimapElement.measureHeightAndWidth()
+        nextAnimationFrame()
 
       describe 'using the mouse scrollwheel over the minimap', ->
         beforeEach ->
@@ -274,28 +307,38 @@ describe 'MinimapElement', ->
 
       describe 'pressing the mouse on the minimap canvas (without scroll animation)', ->
         beforeEach ->
+          t = 0
+          spyOn(minimapElement, 'getTime').andCallFake -> n = t; t += 100; n
+          spyOn(minimapElement, 'requestUpdate').andCallFake ->
+
           atom.config.set 'minimap.scrollAnimation', false
+
           canvas = minimapElement.canvas
           mousedown(canvas)
-          nextAnimationFrame()
 
         it 'scrolls the editor to the line below the mouse', ->
           expect(editor.getScrollTop()).toEqual(360)
 
       describe 'pressing the mouse on the minimap canvas (with scroll animation)', ->
         beforeEach ->
+
+          t = 0
+          spyOn(minimapElement, 'getTime').andCallFake -> n = t; t += 100; n
+          spyOn(minimapElement, 'requestUpdate').andCallFake ->
+
           atom.config.set 'minimap.scrollAnimation', true
+          atom.config.set 'minimap.scrollAnimationDuration', 300
+
           canvas = minimapElement.canvas
           mousedown(canvas)
-          nextAnimationFrame()
+
+          waitsFor -> nextAnimationFrame isnt noAnimationFrame
 
         it 'scrolls the editor gradually to the line below the mouse', ->
-          expect(editor.getScrollTop()).toEqual(0)
-
-          #wait until all animations run out
+          # wait until all animations run out
           waitsFor ->
             nextAnimationFrame()
-            return nextAnimationFrame == noAnimationFrame
+            return nextAnimationFrame is noAnimationFrame
 
           runs ->
             expect(editor.getScrollTop()).toEqual(360)
@@ -308,8 +351,8 @@ describe 'MinimapElement', ->
           {top, left} = visibleArea.getBoundingClientRect()
           originalTop = top
 
-          mousedown(visibleArea, left + 10, top + 10)
-          mousemove(visibleArea, left + 10, top + 50)
+          mousedown(visibleArea, x: left + 10, y: top + 10)
+          mousemove(visibleArea, x: left + 10, y: top + 50)
 
           nextAnimationFrame()
 
@@ -322,10 +365,10 @@ describe 'MinimapElement', ->
 
         it 'stops the drag gesture when the mouse is released outside the minimap', ->
           {top, left} = visibleArea.getBoundingClientRect()
-          mouseup(jasmineContent, left - 10, top + 80)
+          mouseup(jasmineContent, x: left - 10, y: top + 80)
 
           spyOn(minimapElement, 'drag')
-          mousemove(visibleArea, left + 10, top + 50)
+          mousemove(visibleArea, x: left + 10, y: top + 50)
 
           expect(minimapElement.drag).not.toHaveBeenCalled()
 
@@ -345,8 +388,8 @@ describe 'MinimapElement', ->
             {top, left} = visibleArea.getBoundingClientRect()
             originalTop = top
 
-            mousedown(visibleArea, left + 10, top + 10)
-            mousemove(visibleArea, left + 10, top + 50)
+            mousedown(visibleArea, x: left + 10, y: top + 10)
+            mousemove(visibleArea, x: left + 10, y: top + 50)
 
             nextAnimationFrame()
 
@@ -370,8 +413,8 @@ describe 'MinimapElement', ->
             {top, left} = visibleArea.getBoundingClientRect()
             originalTop = top
 
-            mousedown(visibleArea, left + 10, top + 10)
-            mousemove(visibleArea, left + 10, top + 50)
+            mousedown(visibleArea, x: left + 10, y: top + 10)
+            mousemove(visibleArea, x: left + 10, y: top + 50)
 
             nextAnimationFrame()
 
@@ -413,13 +456,15 @@ describe 'MinimapElement', ->
     #    ##    ## ##     ## ##   ### ##        ##  ##    ##
     #     ######   #######  ##    ## ##       ####  ######
 
-    describe 'when the atom themes are changed', ->
+    describe 'when the atom styles are changed', ->
       beforeEach ->
         nextAnimationFrame()
         spyOn(minimapElement, 'requestForcedUpdate').andCallThrough()
         spyOn(minimapElement, 'invalidateCache').andCallThrough()
 
-        atom.themes.emitter.emit 'did-change-active-themes'
+        styleNode = document.createElement('style')
+        styleNode.textContent = 'body{ color: #233; }'
+        atom.styles.emitter.emit 'did-add-style-element', styleNode
 
         waitsFor -> minimapElement.frameRequested
 

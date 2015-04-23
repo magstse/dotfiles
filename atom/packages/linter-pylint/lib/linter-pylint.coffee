@@ -19,7 +19,9 @@ class LinterPylint extends Linter
 
     # sets @cwd to the dirname of the current file
     # if we're in a project, use that path instead
-    @cwd = atom.project.path ? @cwd
+    # TODO: Fix this up so it works with multiple directories
+    paths = atom.project.getPaths()
+    @cwd = paths[0] || @cwd
 
     # Set to observe config options
     atom.config.observe 'linter-pylint.executable', => @updateCommand()
@@ -34,6 +36,7 @@ class LinterPylint extends Linter
     cmd = [atom.config.get 'linter-pylint.executable']
     cmd.push "--msg-template='{line},{column},{category},{msg_id}:{msg}'"
     cmd.push '--reports=n'
+    cmd.push '--output-format=text'
 
     rcFile = atom.config.get 'linter-pylint.rcFile'
     if rcFile

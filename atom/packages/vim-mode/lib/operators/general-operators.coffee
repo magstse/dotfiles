@@ -54,7 +54,7 @@ class Operator
         text += '\n'
     else
       type = Utils.copyType(text)
-    @vimState.setRegister(register, {text, type})
+    @vimState.setRegister(register, {text, type}) unless text is ''
 
 # Public: Generic class for an operator that requires extra input
 class OperatorWithInput extends Operator
@@ -108,19 +108,19 @@ class Delete extends Operator
 # It toggles the case of everything selected by the following motion
 #
 class ToggleCase extends Operator
-  constructor: (@editor, @vimState, {@selectOptions}={}) ->
-    @complete = true
+  constructor: (@editor, @vimState, {@complete, @selectOptions}={}) ->
 
   execute: (count=1) ->
-    if @vimState.mode is 'visual'
-      @editor.replaceSelectedText {}, (text) ->
-        text.split('').map((char) ->
-          lower = char.toLowerCase()
-          if char is lower
-            char.toUpperCase()
-          else
-            lower
-        ).join('')
+    if @motion?
+      if _.contains(@motion.select(count, @selectOptions), true)
+        @editor.replaceSelectedText {}, (text) ->
+          text.split('').map((char) ->
+            lower = char.toLowerCase()
+            if char is lower
+              char.toUpperCase()
+            else
+              lower
+          ).join('')
     else
       @editor.transact =>
         for cursor in @editor.getCursors()
@@ -139,6 +139,34 @@ class ToggleCase extends Operator
               @editor.setTextInBufferRange(range, char.toLowerCase())
 
             cursor.moveRight() unless point.column >= lineLength - 1
+
+    @vimState.activateCommandMode()
+
+#
+# In visual mode or after `g` with a motion, it makes the selection uppercase
+#
+class UpperCase extends Operator
+  constructor: (@editor, @vimState, {@selectOptions}={}) ->
+    @complete = false
+
+  execute: (count=1) ->
+    if _.contains(@motion.select(count, @selectOptions), true)
+      @editor.replaceSelectedText {}, (text) ->
+        text.toUpperCase()
+
+    @vimState.activateCommandMode()
+
+#
+# In visual mode or after `g` with a motion, it makes the selection lowercase
+#
+class LowerCase extends Operator
+  constructor: (@editor, @vimState, {@selectOptions}={}) ->
+    @complete = false
+
+  execute: (count=1) ->
+    if _.contains(@motion.select(count, @selectOptions), true)
+      @editor.replaceSelectedText {}, (text) ->
+        text.toLowerCase()
 
     @vimState.activateCommandMode()
 
@@ -217,11 +245,11 @@ class Mark extends OperatorWithInput
   # at the current position
   #
   # Returns nothing.
-  execute: () ->
+  execute: ->
     @vimState.setMark(@input.characters, @editor.getCursorBufferPosition())
     @vimState.activateCommandMode()
 
 module.exports = {
   Operator, OperatorWithInput, OperatorError, Delete, ToggleCase,
-  Yank, Join, Repeat, Mark
+  UpperCase, LowerCase, Yank, Join, Repeat, Mark
 }
