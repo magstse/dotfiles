@@ -1,4 +1,4 @@
-{Disposable, CompositeDisposable} = require 'atom'
+{CompositeDisposable} = require 'atom'
 
 module.exports =
   config:
@@ -38,7 +38,7 @@ module.exports =
       order: 5
     scopeBlacklist:
       title: 'Scope Blacklist'
-      description: 'Suggestions will not be provided for scopes matching this list. See: https://atom.io/docs/latest/advanced/scopes-and-scope-descriptors'
+      description: 'Suggestions will not be provided for scopes matching this list. See: https://atom.io/docs/latest/behind-atom-scoped-settings-scopes-and-scope-descriptors'
       type: 'array'
       default: []
       items:
@@ -46,7 +46,7 @@ module.exports =
       order: 6
     includeCompletionsFromAllBuffers:
       title: 'Include Completions From All Buffers'
-      description: 'For grammars with no registered provider(s), FuzzyProvider will include completions from all buffers, instead of just the buffer you are currently editing.'
+      description: 'For grammars with no registered provider(s), the default provider will include completions from all buffers, instead of just the buffer you are currently editing.'
       type: 'boolean'
       default: false
       order: 7
@@ -77,7 +77,7 @@ module.exports =
       title: 'Allow Backspace To Trigger Autocomplete'
       description: 'If enabled, typing `backspace` will show the suggestion list if suggestions are available. If disabled, suggestions will not be shown while backspacing.'
       type: 'boolean'
-      default: true
+      default: false
       order: 12
     suggestionListFollows:
       title: 'Suggestions List Follows'
@@ -101,30 +101,38 @@ module.exports =
         type: 'string'
       order: 15
 
+  autocompleteManager: null
+  subscriptions: null
+
   # Public: Creates AutocompleteManager instances for all active and future editors (soon, just a single AutocompleteManager)
   activate: ->
-    # Upgrade to the new config key name
-    oldMax = atom.config.get('autocomplete-plus.maxSuggestions')
-    if oldMax? and oldMax isnt 10
-      atom.config.transact ->
-        atom.config.set('autocomplete-plus.maxVisibleSuggestions', oldMax)
-        atom.config.unset('autocomplete-plus.maxSuggestions')
-
-    @getAutocompleteManager()
+    @subscriptions = new CompositeDisposable
+    @requireAutocompleteManagerAsync()
 
   # Public: Cleans everything up, removes all AutocompleteManager instances
   deactivate: ->
-    @autocompleteManager?.dispose()
+    @subscriptions?.dispose()
+    @subscriptions = null
     @autocompleteManager = null
+
+  requireAutocompleteManagerAsync: (callback) ->
+    if @autocompleteManager?
+      callback?(@autocompleteManager)
+    else
+      setImmediate =>
+        autocompleteManager = @getAutocompleteManager()
+        callback?(autocompleteManager)
 
   getAutocompleteManager: ->
     unless @autocompleteManager?
       AutocompleteManager = require './autocomplete-manager'
       @autocompleteManager = new AutocompleteManager()
+      @subscriptions.add(@autocompleteManager)
     @autocompleteManager
 
   consumeSnippets: (snippetsManager) ->
-    @getAutocompleteManager().setSnippetsManager(snippetsManager)
+    @requireAutocompleteManagerAsync (autocompleteManager) ->
+      autocompleteManager.setSnippetsManager(snippetsManager)
 
   ###
   Section: Provider API
@@ -149,6 +157,8 @@ module.exports =
     providers = [providers] if providers? and not Array.isArray(providers)
     return unless providers?.length > 0
     registrations = new CompositeDisposable
-    for provider in providers
-      registrations.add @getAutocompleteManager().providerManager.registerProvider(provider, apiVersion)
+    @requireAutocompleteManagerAsync (autocompleteManager) ->
+      for provider in providers
+        registrations.add autocompleteManager.providerManager.registerProvider(provider, apiVersion)
+      return
     registrations

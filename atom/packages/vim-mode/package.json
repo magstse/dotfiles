@@ -1,7 +1,7 @@
 {
   "name": "vim-mode",
   "main": "./lib/vim-mode",
-  "version": "0.44.0",
+  "version": "0.46.0",
   "description": "Add vim modal control",
   "license": "MIT",
   "private": true,
@@ -40,10 +40,10 @@
     "url": "https://github.com/atom/vim-mode/issues"
   },
   "homepage": "https://github.com/atom/vim-mode",
-  "_id": "vim-mode@0.44.0",
-  "_shasum": "7ddb7887180c0263b604f6258e6f4f10364f6626",
-  "_resolved": "file:../d-115323-6215-1pth4r9/package.tgz",
-  "_from": "../d-115323-6215-1pth4r9/package.tgz",
+  "_id": "vim-mode@0.46.0",
+  "_shasum": "5afc3f591ac2b50111e473cfaccef4a2a44f523d",
+  "_resolved": "file:../d-115411-7946-1p76s1x/package.tgz",
+  "_from": "../d-115411-7946-1p76s1x/package.tgz",
   "_atomModuleCache": {
     "version": 1,
     "dependencies": [
@@ -134,12 +134,12 @@
         "lib/motions/move-to-mark-motion.coffee",
         "lib/motions/search-motion.coffee",
         "lib/operators/general-operators.coffee",
+        "lib/operators/increase-operators.coffee",
         "lib/operators/indent-operators.coffee",
         "lib/operators/index.coffee",
         "lib/operators/input.coffee",
         "lib/operators/put-operator.coffee",
         "lib/operators/replace-operator.coffee",
-        "lib/panes.coffee",
         "lib/prefixes.coffee",
         "lib/scroll.coffee",
         "lib/settings.coffee",

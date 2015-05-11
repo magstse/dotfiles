@@ -19,13 +19,16 @@ class LinterCoffeelint extends Linter
 
   _resolveCoffeeLint: (filePath) ->
     try
-      return resolve('coffeelint', {
+      path.dirname(resolve('coffeelint/package.json', {
         basedir: path.dirname(filePath)
-      })
+      }))
     return 'coffeelint'
 
   lintFile: (filePath, callback) ->
-    coffeeLintPath = @_resolveCoffeeLint(filePath)
+    filename = path.basename filePath
+    origPath = path.join @cwd, filename
+
+    coffeeLintPath = @_resolveCoffeeLint(origPath)
     coffeelint = require(coffeeLintPath)
 
     # Versions before 1.9.1 don't work with atom because of an assumption that
@@ -38,9 +41,6 @@ class LinterCoffeelint extends Linter
       coffeelint = require(coffeeLintPath)
 
     configFinder = require("#{coffeeLintPath}/lib/configfinder")
-
-    filename = path.basename filePath
-    origPath = path.join @cwd, filename
 
     isLiterate = @editor.getGrammar().scopeName is 'source.litcoffee'
     source = @editor.getText()
@@ -62,13 +62,16 @@ class LinterCoffeelint extends Linter
     callback(result.map(@transform))
 
   transform: (m) =>
+    message = m.message
+    if m.context
+      message += ". #{m.context}"
     @createMessage {
       line: m.lineNumber,
       # None of the rules currently return a column, but they may in the future.
       col: m.column,
       error: m.level is 'error'
       warning: m.level is 'warn'
-      message: "#{m.message} (#{m.rule})"
+      message: "#{message}. (#{m.rule})"
     }
 
 module.exports = LinterCoffeelint
